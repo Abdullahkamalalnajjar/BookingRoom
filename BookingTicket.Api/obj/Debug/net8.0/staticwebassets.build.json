@@ -1,0 +1,11 @@
+{
+  "Version": 1,
+  "Hash": "WqcG0LDEnTN9pAYf5Eam6tBg8eMvXlShNYwwHlzsrh8=",
+  "Source": "BookingTicket.Api",
+  "BasePath": "_content/BookingTicket.Api",
+  "Mode": "Default",
+  "ManifestType": "Build",
+  "ReferencedProjectsConfiguration": [],
+  "DiscoveryPatterns": [],
+  "Assets": []
+}

@@ -1,0 +1,12 @@
+/Users/kemo/RiderProjects/BookingTicket.solution/BookingTicket.Domain/bin/Debug/net8.0/BookingTicket.Domain.deps.json
+/Users/kemo/RiderProjects/BookingTicket.solution/BookingTicket.Domain/bin/Debug/net8.0/BookingTicket.Domain.dll
+/Users/kemo/RiderProjects/BookingTicket.solution/BookingTicket.Domain/bin/Debug/net8.0/BookingTicket.Domain.pdb
+/Users/kemo/RiderProjects/BookingTicket.solution/BookingTicket.Domain/obj/Debug/net8.0/BookingTicket.Domain.csproj.AssemblyReference.cache
+/Users/kemo/RiderProjects/BookingTicket.solution/BookingTicket.Domain/obj/Debug/net8.0/BookingTicket.Domain.GeneratedMSBuildEditorConfig.editorconfig
+/Users/kemo/RiderProjects/BookingTicket.solution/BookingTicket.Domain/obj/Debug/net8.0/BookingTicket.Domain.AssemblyInfoInputs.cache
+/Users/kemo/RiderProjects/BookingTicket.solution/BookingTicket.Domain/obj/Debug/net8.0/BookingTicket.Domain.AssemblyInfo.cs
+/Users/kemo/RiderProjects/BookingTicket.solution/BookingTicket.Domain/obj/Debug/net8.0/BookingTicket.Domain.csproj.CoreCompileInputs.cache
+/Users/kemo/RiderProjects/BookingTicket.solution/BookingTicket.Domain/obj/Debug/net8.0/BookingTicket.Domain.dll
+/Users/kemo/RiderProjects/BookingTicket.solution/BookingTicket.Domain/obj/Debug/net8.0/refint/BookingTicket.Domain.dll
+/Users/kemo/RiderProjects/BookingTicket.solution/BookingTicket.Domain/obj/Debug/net8.0/BookingTicket.Domain.pdb
+/Users/kemo/RiderProjects/BookingTicket.solution/BookingTicket.Domain/obj/Debug/net8.0/ref/BookingTicket.Domain.dll

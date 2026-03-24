@@ -8,11 +8,15 @@ public sealed class CreateBookingCommandValidator : AbstractValidator<CreateBook
     {
         RuleLevelCascadeMode = CascadeMode.Stop;
 
-        RuleFor(x => x.seats)
+        RuleFor(x => x.RoomId)
+            .NotEmpty()
+            .WithMessage("RoomId is required.");
+
+        RuleFor(x => x.Seats)
             .GreaterThan(0)
             .WithMessage("Seats must be greater than 0.");
 
-        RuleFor(x => x.status)
+        RuleFor(x => x.Status)
             .IsInEnum()
             .WithMessage("Status is invalid.");
     }

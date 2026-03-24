@@ -19,6 +19,7 @@ public sealed class GetBookingByIdQueryHandler(IAppDbContext context, ILogger<Ge
     {
         var exist = await _context.Bookings
             .AsNoTracking()
+            .Include(x => x.Room)
             .FirstOrDefaultAsync(x => x.Id == request.id, cancellationToken);
 
         if (exist is null)

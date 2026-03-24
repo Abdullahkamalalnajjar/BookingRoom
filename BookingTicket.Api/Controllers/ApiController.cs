@@ -1,7 +1,6 @@
 ﻿using BookingTicket.Domain.Common.Results;
 
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.ModelBinding;
 
 namespace BookingTicket.Api.Controllers;
 
@@ -12,7 +11,9 @@ public class ApiController : ControllerBase
     {
         if (errors.Count is 0)
         {
-            return Problem();
+            var unexpected = Error.Unexpected(description: "Unexpected error.");
+            Result<object?> response = unexpected;
+            return StatusCode(StatusCodes.Status500InternalServerError, response);
         }
 
         if (errors.All(error => error.Type == ErrorKind.Validation))
@@ -35,15 +36,13 @@ public class ApiController : ControllerBase
             _ => StatusCodes.Status500InternalServerError,
         };
 
-        return Problem(statusCode: statusCode, title: error.Description);
+        Result<object?> response = error;
+        return StatusCode(statusCode, response);
     }
 
     private ActionResult ValidationProblem(List<Error> errors)
     {
-        var modelStateDictionary = new ModelStateDictionary();
-
-        errors.ForEach(error => modelStateDictionary.AddModelError(error.Code, error.Description));
-
-        return ValidationProblem(modelStateDictionary);
+        Result<object?> response = errors;
+        return StatusCode(StatusCodes.Status400BadRequest, response);
     }
 }

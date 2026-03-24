@@ -5,13 +5,15 @@ namespace BookingTicket.Application.Features.Bookings.Mapper;
 
 public static class BookingMapper
 {
-    public static BookingDto ToDo(this Booking booking)
+    public static BookingDto ToDo(this Booking booking, string? roomName = null)
     {
         ArgumentNullException.ThrowIfNull(booking);
 
         return new BookingDto
         {
             Id = booking.Id,
+            RoomId = booking.RoomId,
+            RoomName = roomName ?? booking.Room?.Name ?? string.Empty,
             seats = booking.Seats,
             Status = booking.Status.ToString(),
         };

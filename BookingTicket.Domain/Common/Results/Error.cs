@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace BookingTicket.Domain.Common.Results;
 
 public readonly record struct Error
@@ -13,6 +15,7 @@ public readonly record struct Error
 
     public string Description { get; }
 
+    [JsonConverter(typeof(JsonStringEnumConverter))]
     public ErrorKind Type { get; }
 
     public static Error Failure(string code = nameof(Failure), string description = "General failure.")

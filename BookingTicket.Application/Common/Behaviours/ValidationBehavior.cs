@@ -19,7 +19,7 @@ public class ValidationBehavior<TRequest, TResponse>(IValidator<TRequest>? valid
     {
         if (_validator is null)
         {
-            return await next(ct);
+            return await next();
         }
 
         var validationResult = await _validator.ValidateAsync(request, ct);
@@ -31,7 +31,7 @@ public class ValidationBehavior<TRequest, TResponse>(IValidator<TRequest>? valid
 
         var errors = validationResult.Errors
             .ConvertAll(error => Error.Validation(
-                code: error.PropertyName,
+                code: string.IsNullOrWhiteSpace(error.ErrorCode) ? error.PropertyName : error.ErrorCode,
                 description: error.ErrorMessage));
 
         return (dynamic)errors;

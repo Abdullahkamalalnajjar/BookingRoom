@@ -7,6 +7,7 @@ namespace BookingTicket.Application.Features.Bookings.Commands.CreateBooking;
 
 public sealed record CreateBookingCommand
 (
-    int seats,
-    BookingStatus status
+    Guid RoomId,
+    int Seats,
+    BookingStatus Status
     ):IRequest<Result<BookingDto>>;

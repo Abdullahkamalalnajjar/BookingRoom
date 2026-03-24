@@ -3,7 +3,9 @@ using BookingTicket.Application.Features.Bookings.Dtos;
 using BookingTicket.Application.Features.Bookings.Mapper;
 using BookingTicket.Domain.Bookings;
 using BookingTicket.Domain.Common.Results;
+using BookingTicket.Domain.Rooms;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace BookingTicket.Application.Features.Bookings.Commands.CreateBooking;
@@ -16,23 +18,49 @@ public class CreateBookingCommandHandler(IAppDbContext context, ILogger<CreateBo
 
     public async Task<Result<BookingDto>> Handle(CreateBookingCommand request, CancellationToken cancellationToken)
     {
-        var createResult = Booking.Create(Guid.NewGuid(), request.seats);
+        var room = await _context.Rooms
+            .AsTracking()
+            .FirstOrDefaultAsync(x => x.Id == request.RoomId, cancellationToken);
+
+        if (room is null)
+        {
+            _logger.LogInformation("Create booking failed. Room not found. RoomId={RoomId}", request.RoomId);
+            return RoomErrors.RoomNotFound;
+        }
+
+        var reserveResult = room.ReserveSeats(request.Seats);
+        if (reserveResult.IsError)
+        {
+            _logger.LogInformation(
+                "Create booking failed. RoomId={RoomId}, Seats={Seats}. Errors={Errors}",
+                request.RoomId,
+                request.Seats,
+                reserveResult.Errors);
+
+            return reserveResult.Errors;
+        }
+
+        var createResult = Booking.Create(Guid.NewGuid(), request.RoomId, request.Seats);
         if (createResult.IsError)
         {
-            _logger.LogWarning("Create booking failed. Seats={Seats}. Errors={Errors}", request.seats, createResult.Errors);
+            _logger.LogWarning(
+                "Create booking failed. RoomId={RoomId}, Seats={Seats}. Errors={Errors}",
+                request.RoomId,
+                request.Seats,
+                createResult.Errors);
             return createResult.Errors;
         }
 
         var booking = createResult.Value;
 
         // Allow the client to set an initial status (still validated separately).
-        var updateResult = booking.Update(request.seats, request.status);
+        var updateResult = booking.Update(request.Seats, request.Status);
         if (updateResult.IsError)
         {
             _logger.LogWarning(
                 "Create booking failed while applying status. Seats={Seats}, Status={Status}. Errors={Errors}",
-                request.seats,
-                request.status,
+                request.Seats,
+                request.Status,
                 updateResult.Errors);
 
             return updateResult.Errors;
@@ -41,6 +69,6 @@ public class CreateBookingCommandHandler(IAppDbContext context, ILogger<CreateBo
         _context.Bookings.Add(booking);
         await _context.SaveChangesAsync(cancellationToken);
 
-        return booking.ToDo();
+        return booking.ToDo(room.Name);
     }
 }

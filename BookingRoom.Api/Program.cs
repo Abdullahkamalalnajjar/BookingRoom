@@ -1,12 +1,8 @@
+using BookingRoom.Application;
 using BookingRoom.Infrastructure;
-using BookingRoom.Application.Common.Behaviours;
-using BookingRoom.Application.Features.Bookings.Commands.CreateBooking;
-using BookingRoom.Application.Features.Bookings.Queries.GetBookingById;
-using BookingRoom.Application.Features.Bookings.Queries.GetBookings;
+using BookingRoom.Infrastructure.Data;
 using Asp.Versioning;
-using BookingRoom.Application.Features.Bookings.Queries.GetBookingByStatus;
-using FluentValidation;
-using MediatR;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -22,21 +18,15 @@ builder.Services.AddOutputCache();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddMediatR(cfg =>
-{
-    cfg.RegisterServicesFromAssemblyContaining<CreateBookingCommand>();
-});
-
-// Validators (keep it explicit to avoid adding extra FluentValidation DI packages).
-builder.Services.AddScoped<IValidator<CreateBookingCommand>, CreateBookingCommandValidator>();
-builder.Services.AddScoped<IValidator<GetBookingQuery>, GetBookingByIdValidator>();
-builder.Services.AddScoped<IValidator<GetBookingByStatusQuery>, GetBookingByStatusValidation>();
-
-// MediatR pipeline
-builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
-
+builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
 var app = builder.Build();
+
+using (var scope = app.Services.CreateScope())
+{
+    var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    dbContext.Database.Migrate();
+}
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

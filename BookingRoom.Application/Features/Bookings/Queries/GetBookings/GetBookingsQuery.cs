@@ -4,4 +4,4 @@ using MediatR;
 
 namespace BookingRoom.Application.Features.Bookings.Queries.GetBookings;
 
-public sealed record GetBookingsQuery(string? status = null) : IRequest<Result<List<BookingDto>>>;
+public sealed record GetBookingsQuery() : IRequest<Result<List<BookingDto>>>;

@@ -1,0 +1,11 @@
+{
+  "Version": 1,
+  "Hash": "zC1bjTDTpwCH8hcIuiVpvZiWoMx+FohesnTR4MonvEY=",
+  "Source": "BookingRoom.Api",
+  "BasePath": "_content/BookingRoom.Api",
+  "Mode": "Default",
+  "ManifestType": "Build",
+  "ReferencedProjectsConfiguration": [],
+  "DiscoveryPatterns": [],
+  "Assets": []
+}

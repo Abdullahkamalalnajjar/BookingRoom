@@ -1,0 +1,16 @@
+/Users/kemo/RiderProjects/BookingRoom/BookingRoom.Application/bin/Debug/net8.0/BookingRoom.Application.deps.json
+/Users/kemo/RiderProjects/BookingRoom/BookingRoom.Application/bin/Debug/net8.0/BookingRoom.Application.dll
+/Users/kemo/RiderProjects/BookingRoom/BookingRoom.Application/bin/Debug/net8.0/BookingRoom.Application.pdb
+/Users/kemo/RiderProjects/BookingRoom/BookingRoom.Application/bin/Debug/net8.0/BookingRoom.Domain.dll
+/Users/kemo/RiderProjects/BookingRoom/BookingRoom.Application/bin/Debug/net8.0/BookingRoom.Domain.pdb
+/Users/kemo/RiderProjects/BookingRoom/BookingRoom.Application/obj/Debug/net8.0/BookingRoom.Application.csproj.AssemblyReference.cache
+/Users/kemo/RiderProjects/BookingRoom/BookingRoom.Application/obj/Debug/net8.0/BookingRoom.Application.GeneratedMSBuildEditorConfig.editorconfig
+/Users/kemo/RiderProjects/BookingRoom/BookingRoom.Application/obj/Debug/net8.0/BookingRoom.Application.AssemblyInfoInputs.cache
+/Users/kemo/RiderProjects/BookingRoom/BookingRoom.Application/obj/Debug/net8.0/BookingRoom.Application.AssemblyInfo.cs
+/Users/kemo/RiderProjects/BookingRoom/BookingRoom.Application/obj/Debug/net8.0/BookingRoom.Application.csproj.CoreCompileInputs.cache
+/Users/kemo/RiderProjects/BookingRoom/BookingRoom.Application/obj/Debug/net8.0/BookingRoom.Application.sourcelink.json
+/Users/kemo/RiderProjects/BookingRoom/BookingRoom.Application/obj/Debug/net8.0/BookingR.4997F4F8.Up2Date
+/Users/kemo/RiderProjects/BookingRoom/BookingRoom.Application/obj/Debug/net8.0/BookingRoom.Application.dll
+/Users/kemo/RiderProjects/BookingRoom/BookingRoom.Application/obj/Debug/net8.0/refint/BookingRoom.Application.dll
+/Users/kemo/RiderProjects/BookingRoom/BookingRoom.Application/obj/Debug/net8.0/BookingRoom.Application.pdb
+/Users/kemo/RiderProjects/BookingRoom/BookingRoom.Application/obj/Debug/net8.0/ref/BookingRoom.Application.dll

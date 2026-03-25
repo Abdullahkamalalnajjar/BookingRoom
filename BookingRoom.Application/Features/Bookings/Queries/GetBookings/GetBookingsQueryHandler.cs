@@ -19,18 +19,6 @@ public class GetBookingsQueryHandler (IAppDbContext  context,ILogger<GetBookings
         IQueryable<BookingRoom.Domain.Bookings.Booking> bookingsQuery = _context.Bookings
             .AsNoTracking()
             .Include(x => x.Room);
-
-        if (!string.IsNullOrWhiteSpace(request.status))
-        {
-            if (!Enum.TryParse<BookingStatus>(request.status, ignoreCase: true, out var parsedStatus) ||
-                !Enum.IsDefined(typeof(BookingStatus), parsedStatus))
-            {
-                return Error.Validation("Booking_Status_Invalid", "الحالة المرسلة غير موجودة.");
-            }
-
-            bookingsQuery = bookingsQuery.Where(x => x.Status == parsedStatus);
-        }
-        
         var bookings = await bookingsQuery.ToListAsync(cancellationToken);
         return bookings.ToDtos();
     }

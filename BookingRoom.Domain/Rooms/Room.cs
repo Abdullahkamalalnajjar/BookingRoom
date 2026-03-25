@@ -56,7 +56,7 @@ public class Room : AuditableEntity
         return Result.Updated;
     }
 
-    public Result<Updated> ReleaseSeats(int seats)
+    public Result<Updated> ReleaseSeats(int seats) // increase available
     {
         if (seats <= 0)
         {

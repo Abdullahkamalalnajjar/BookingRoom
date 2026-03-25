@@ -4,9 +4,11 @@ namespace BookingRoom.Domain.Rooms;
 
 public static class RoomErrors
 {
+    public static Error CreateRoomError => Error.Failure("Room_Create_Error", "Room creation error");
     public static Error RoomNotFound =>
         Error.NotFound("Room_Not_Found", "Room not found");
-
+    public static Error RoomNameIsExist =>
+        Error.NotFound("Room_Name_IsExist", "Room Name is Exist");
     public static Error NameRequired =>
         Error.Validation("Room_Name_Required", "Room name is required");
 

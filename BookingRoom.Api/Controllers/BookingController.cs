@@ -4,6 +4,7 @@ using BookingRoom.Application.Features.Bookings.Queries.GetBookingById;
 using BookingRoom.Application.Features.Bookings.Queries.GetBookings;
 using BookingRoom.Domain.Common.Results;
 using Asp.Versioning;
+using BookingRoom.Application.Features.Bookings.Queries.GetBookingByStatus;
 using Microsoft.AspNetCore.OutputCaching;
 using Microsoft.AspNetCore.Mvc;
 using MediatR;
@@ -45,10 +46,9 @@ public sealed class BookingController(ISender sender) : ApiController
     [ProducesDefaultResponseType]
     [OutputCache(Duration = 60)]
     public async Task<IActionResult> GetBookings(
-        [FromQuery] string? status,
         CancellationToken cancellationToken)
     {
-        var result = await _sender.Send(new GetBookingsQuery(status), cancellationToken);
+        var result = await _sender.Send(new GetBookingsQuery(), cancellationToken);
 
         return result.Match(
             onValue: bookings =>
@@ -66,7 +66,7 @@ public sealed class BookingController(ISender sender) : ApiController
     [MapToApiVersion("1.0")]
     public async Task<IActionResult> GetBookingsByStatus([FromRoute] string status, CancellationToken cancellationToken)
     {
-        var result = await _sender.Send(new GetBookingsQuery(status), cancellationToken);
+        var result = await _sender.Send(new GetBookingByStatusQuery(status), cancellationToken);
 
         return result.Match(
             onValue: bookings =>

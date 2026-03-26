@@ -4,6 +4,8 @@ using BookingRoom.Application.Features.Bookings.Queries.GetBookingById;
 using BookingRoom.Application.Features.Bookings.Queries.GetBookings;
 using BookingRoom.Domain.Common.Results;
 using Asp.Versioning;
+using BookingRoom.Application.Features.Bookings.Commands.DeleteBooking;
+using BookingRoom.Application.Features.Bookings.Commands.UpdateBooking;
 using BookingRoom.Application.Features.Bookings.Queries.GetBookingByStatus;
 using Microsoft.AspNetCore.OutputCaching;
 using Microsoft.AspNetCore.Mvc;
@@ -17,6 +19,7 @@ public sealed class BookingController(ISender sender) : ApiController
 {
     private readonly ISender _sender = sender;
 
+    #region GetById
     [HttpGet("{id:guid}")]
     [ProducesResponseType(typeof(Result<BookingDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(Result<object?>), StatusCodes.Status400BadRequest)]
@@ -34,7 +37,9 @@ public sealed class BookingController(ISender sender) : ApiController
             },
             onError: errors => Problem(errors));
     }
+    #endregion
 
+    #region Get Bookings
     [HttpGet]
     [ProducesResponseType(typeof(Result<List<BookingDto>>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(Result<object?>), StatusCodes.Status400BadRequest)]
@@ -58,7 +63,9 @@ public sealed class BookingController(ISender sender) : ApiController
             },
             onError: errors => Problem(errors));
     }
+    #endregion
 
+    #region Get Bookings By Status
     [HttpGet("{status}")]
     [ProducesResponseType(typeof(Result<List<BookingDto>>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(Result<object?>), StatusCodes.Status400BadRequest)]
@@ -76,7 +83,9 @@ public sealed class BookingController(ISender sender) : ApiController
             },
             onError: errors => Problem(errors));
     }
+    #endregion
 
+    #region Create Booking
     [HttpPost]
     [ProducesResponseType(typeof(Result<BookingDto>), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(Result<object?>), StatusCodes.Status400BadRequest)]
@@ -93,6 +102,31 @@ public sealed class BookingController(ISender sender) : ApiController
                 Result<BookingDto> response = booking;
                 return CreatedAtAction(nameof(GetById), new { id = booking.Id }, response);
             },
-            onError: errors => Problem(errors));
+            onError: Problem);
     }
+    #endregion
+
+    #region Update Booking
+    [HttpPut]
+   public async Task<IActionResult> Update([FromBody] UpdateBookingCommand command,CancellationToken ctx)
+   {
+       var result = await _sender.Send(command, ctx);
+       return result.Match(
+           onValue: Ok,
+           onError: Problem);
+   }
+    #endregion
+
+    #region Delete
+    [HttpDelete("{id:guid}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(Result<object?>), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(Result<object?>), StatusCodes.Status500InternalServerError)]
+    public async Task<IActionResult> Delete([FromRoute] Guid id, CancellationToken cancellationToken)
+    {
+        var result = await _sender.Send(new DeleteBookingCommand(id), cancellationToken);
+        return result.Match(_ => NoContent(),
+            Problem);
+    }
+    #endregion
 }

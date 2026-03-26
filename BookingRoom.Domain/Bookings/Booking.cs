@@ -50,8 +50,11 @@ public class Booking : AuditableEntity
         RoomId = roomId;
         return Result.Updated;
     }
-    
-    
-        
 
+    public Result<Updated> ChangeStatus(BookingStatus status)
+    {
+        status = status;
+        return Result.Updated;
+    }
+    
 }

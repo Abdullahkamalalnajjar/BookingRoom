@@ -40,7 +40,49 @@ public class Room : AuditableEntity
         return new Room(id, name.Trim(), seatCapacity);
     }
 
-    public Result<Updated> ReserveSeats(int seats)
+    public Result<Updated> Update(string name, int seatCapacity, int availableSeats)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            return RoomErrors.NameRequired;
+        }
+
+        if (seatCapacity <= 0)
+        {
+            return RoomErrors.CapacityInvalid;
+        }
+
+        if (availableSeats < 0)
+        {
+            return RoomErrors.AvailableSeatsInvalid;
+        }
+
+        if (availableSeats > seatCapacity)
+        {
+            return RoomErrors.AvailableSeatsOverflow;
+        }
+
+        var reservedSeats = SeatCapacity - AvailableSeats;
+
+        if (seatCapacity < reservedSeats)
+        {
+            return RoomErrors.CapacityBelowReservedSeats(reservedSeats);
+        }
+
+        var expectedAvailableSeats = seatCapacity - reservedSeats;
+        if (availableSeats != expectedAvailableSeats)
+        {
+            return RoomErrors.AvailableSeatsInconsistent(expectedAvailableSeats);
+        }
+
+        Name = name.Trim();
+        SeatCapacity = seatCapacity;
+        AvailableSeats = availableSeats;
+
+        return Result.Updated;
+    }
+
+    public Result<Updated> ReserveSeats(int seats) // reduce available seats
     {
         if (seats <= 0)
         {

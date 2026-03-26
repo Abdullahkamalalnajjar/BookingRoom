@@ -31,6 +31,8 @@ public sealed class CreateRoomCommandHandler (IAppDbContext context):
         {
             return roomResult.Errors;
         }   
+        _context.Rooms.Add(roomResult.Value);
+        await _context.SaveChangesAsync(cancellationToken);
         return roomResult.Value.ToDto();
     }
 }

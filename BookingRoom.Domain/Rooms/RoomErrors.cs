@@ -8,7 +8,7 @@ public static class RoomErrors
     public static Error RoomNotFound =>
         Error.NotFound("Room_Not_Found", "Room not found");
     public static Error RoomNameIsExist =>
-        Error.NotFound("Room_Name_IsExist", "Room Name is Exist");
+        Error.Conflict("Room_Name_IsExist", "Room name already exists.");
     public static Error NameRequired =>
         Error.Validation("Room_Name_Required", "Room name is required");
 

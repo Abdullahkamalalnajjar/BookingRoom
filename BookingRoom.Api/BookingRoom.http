@@ -1,6 +1,49 @@
-@BookingRoom_HostAddress = http://localhost:5205
+@BookingRoom_HostAddress = https://localhost:7125
+@accessToken = replace-with-access-token
+@refreshToken = replace-with-refresh-token
 
-GET {{BookingRoom_HostAddress}}/weatherforecast/
-Accept: application/json
+POST {{BookingRoom_HostAddress}}/api/auth/signup
+Content-Type: application/json
+
+{
+  "email": "manager@bookingroom.com",
+  "password": "123456",
+  "role": "Manager",
+  "phoneNumber": null,
+  "city": null
+}
+
+###
+
+POST {{BookingRoom_HostAddress}}/api/auth/signup
+Content-Type: application/json
+
+{
+  "email": "member@bookingroom.com",
+  "password": "123456",
+  "role": "Member",
+  "phoneNumber": "01000000000",
+  "city": "Cairo"
+}
+
+###
+
+POST {{BookingRoom_HostAddress}}/api/auth/signin
+Content-Type: application/json
+
+{
+  "email": "member@bookingroom.com",
+  "password": "123456"
+}
+
+###
+
+POST {{BookingRoom_HostAddress}}/api/auth/refresh
+Content-Type: application/json
+
+{
+  "refreshToken": "{{refreshToken}}",
+  "expiredAccessToken": "{{accessToken}}"
+}
 
 ###

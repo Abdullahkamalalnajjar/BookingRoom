@@ -2,11 +2,13 @@ using BookingRoom.Application.Features.Bookings.Commands.CreateBooking;
 using BookingRoom.Application.Features.Bookings.Dtos;
 using BookingRoom.Application.Features.Bookings.Queries.GetBookingById;
 using BookingRoom.Application.Features.Bookings.Queries.GetBookings;
+using BookingRoom.Application.Common.Security;
 using BookingRoom.Domain.Common.Results;
 using Asp.Versioning;
 using BookingRoom.Application.Features.Bookings.Commands.DeleteBooking;
 using BookingRoom.Application.Features.Bookings.Commands.UpdateBooking;
 using BookingRoom.Application.Features.Bookings.Queries.GetBookingByStatus;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.OutputCaching;
 using Microsoft.AspNetCore.Mvc;
 using MediatR;
@@ -21,6 +23,7 @@ public sealed class BookingController(ISender sender) : ApiController
 
     #region GetById
     [HttpGet("{id:guid}")]
+    [Authorize(Policy = AuthorizationPolicies.BookingsRead)]
     [ProducesResponseType(typeof(Result<BookingDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(Result<object?>), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(Result<object?>), StatusCodes.Status404NotFound)]
@@ -41,6 +44,7 @@ public sealed class BookingController(ISender sender) : ApiController
 
     #region Get Bookings
     [HttpGet]
+    [Authorize(Policy = AuthorizationPolicies.BookingsRead)]
     [ProducesResponseType(typeof(Result<List<BookingDto>>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(Result<object?>), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(Result<object?>), StatusCodes.Status500InternalServerError)]
@@ -67,6 +71,7 @@ public sealed class BookingController(ISender sender) : ApiController
 
     #region Get Bookings By Status
     [HttpGet("{status}")]
+    [Authorize(Policy = AuthorizationPolicies.BookingsRead)]
     [ProducesResponseType(typeof(Result<List<BookingDto>>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(Result<object?>), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(Result<object?>), StatusCodes.Status500InternalServerError)]
@@ -87,8 +92,10 @@ public sealed class BookingController(ISender sender) : ApiController
 
     #region Create Booking
     [HttpPost]
+    [Authorize(Policy = AuthorizationPolicies.BookingsWrite)]
     [ProducesResponseType(typeof(Result<BookingDto>), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(Result<object?>), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(Result<object?>), StatusCodes.Status409Conflict)]
     [ProducesResponseType(typeof(Result<object?>), StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> Create(
         [FromBody] CreateBookingCommand command,
@@ -108,6 +115,7 @@ public sealed class BookingController(ISender sender) : ApiController
 
     #region Update Booking
     [HttpPut]
+    [Authorize(Policy = AuthorizationPolicies.BookingsWrite)]
    public async Task<IActionResult> Update([FromBody] UpdateBookingCommand command,CancellationToken ctx)
    {
        var result = await _sender.Send(command, ctx);
@@ -119,6 +127,7 @@ public sealed class BookingController(ISender sender) : ApiController
 
     #region Delete
     [HttpDelete("{id:guid}")]
+    [Authorize(Policy = AuthorizationPolicies.BookingsWrite)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(Result<object?>), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(Result<object?>), StatusCodes.Status500InternalServerError)]

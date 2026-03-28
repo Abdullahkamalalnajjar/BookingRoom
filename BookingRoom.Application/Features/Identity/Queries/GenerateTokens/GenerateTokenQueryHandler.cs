@@ -25,13 +25,10 @@ public class GenerateTokenQueryHandler(ILogger<GenerateTokenQueryHandler> logger
 
         var generateTokenResult = await _tokenProvider.GenerateJwtTokenAsync(userResponse.Value, ct);
 
-        if (generateTokenResult.IsError)
-        {
-            _logger.LogError("Generate token error occurred: {ErrorDescription}", generateTokenResult.TopError.Description);
+        if (!generateTokenResult.IsError) return generateTokenResult.Value;
+        _logger.LogError("Generate token error occurred: {ErrorDescription}", generateTokenResult.TopError.Description);
 
-            return generateTokenResult.Errors;
-        }
+        return generateTokenResult.Errors;
 
-        return generateTokenResult.Value;
     }
 }

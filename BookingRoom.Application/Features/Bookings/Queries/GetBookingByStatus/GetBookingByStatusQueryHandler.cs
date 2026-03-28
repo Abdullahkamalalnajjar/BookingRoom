@@ -8,10 +8,11 @@ using Microsoft.EntityFrameworkCore;
 
 namespace BookingRoom.Application.Features.Bookings.Queries.GetBookingByStatus;
 
-public class GetBookingByStatusQueryHandler (IAppDbContext context):
+public class GetBookingByStatusQueryHandler (IAppDbContext context, IIdentityService identityService):
     IRequestHandler<GetBookingByStatusQuery, Result<List<BookingDto>>>
 {
     private readonly IAppDbContext _context = context;
+    private readonly IIdentityService _identityService = identityService;
     public async Task<Result<List<BookingDto>>> Handle(GetBookingByStatusQuery request, CancellationToken cancellationToken)
     {
         if (!Enum.TryParse<BookingStatus>(request.status, ignoreCase: true, out var parsedStatus))
@@ -25,6 +26,6 @@ public class GetBookingByStatusQueryHandler (IAppDbContext context):
             .Where(s => s.Status == parsedStatus)
             .ToListAsync(cancellationToken);
 
-        return bookings.ToDtos();
+        return await BookingMapper.ToDtosAsync(bookings, _identityService.GetUserNamesAsync);
     }
 }

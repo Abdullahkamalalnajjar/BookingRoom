@@ -6,6 +6,9 @@ public static class BookingErrors
 {
     public static Error BookingNotFound =>
     Error.NotFound("Booking_Not_Found","Booking Not found");
+
+    public static Error UserRequired =>
+    Error.Validation("User_Required","User is required");
     
     public static Error SeatRequired =>
     Error.Validation("Seat_Required","Seat required");

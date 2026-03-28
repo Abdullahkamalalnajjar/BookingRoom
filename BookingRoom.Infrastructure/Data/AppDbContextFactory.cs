@@ -1,7 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.Configuration;
-
+using BookingRoom.Infrastructure.Common;
+ 
 namespace BookingRoom.Infrastructure.Data;
 
 /// <summary>
@@ -22,7 +23,7 @@ public sealed class AppDbContextFactory : IDesignTimeDbContextFactory<AppDbConte
         var optionsBuilder = new DbContextOptionsBuilder<AppDbContext>()
             .UseSqlServer(connectionString);
 
-        return new AppDbContext(optionsBuilder.Options);
+        return new AppDbContext(optionsBuilder.Options, new NullMediator());
     }
 
     private static IConfigurationRoot BuildConfiguration()
@@ -66,4 +67,3 @@ public sealed class AppDbContextFactory : IDesignTimeDbContextFactory<AppDbConte
         return null;
     }
 }
-

@@ -9,10 +9,11 @@ using Microsoft.Extensions.Logging;
 
 namespace BookingRoom.Application.Features.Bookings.Queries.GetBookingById;
 
-public sealed class GetBookingByIdQueryHandler(IAppDbContext context, ILogger<GetBookingByIdQueryHandler> logger) :
+public sealed class GetBookingByIdQueryHandler(IAppDbContext context, IIdentityService identityService, ILogger<GetBookingByIdQueryHandler> logger) :
     IRequestHandler<GetBookingQuery, Result<BookingDto>>
 {
     private readonly IAppDbContext _context = context;
+    private readonly IIdentityService _identityService = identityService;
     private readonly ILogger<GetBookingByIdQueryHandler> _logger = logger;
 
     public async Task<Result<BookingDto>> Handle(GetBookingQuery request, CancellationToken cancellationToken)
@@ -28,6 +29,7 @@ public sealed class GetBookingByIdQueryHandler(IAppDbContext context, ILogger<Ge
             return BookingErrors.BookingNotFound;
         }
 
-        return exist.ToDo();
+        var userName = await _identityService.GetUserNameAsync(exist.UserId);
+        return exist.ToDo(userName: userName);
     }
 }

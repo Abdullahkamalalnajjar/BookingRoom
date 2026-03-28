@@ -1,5 +1,6 @@
 using BookingRoom.Application.Common.Interfaces;
 using BookingRoom.Domain.Bookings;
+using BookingRoom.Domain.Bookings.Events;
 using BookingRoom.Domain.Common.Results;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -20,6 +21,7 @@ public sealed class DeleteBookingCommandHandler(
         {
             return BookingErrors.BookingNotFound;
         }
+        booking.AddDomainEvent(new BookingChangedEvent(booking, BookingChangeType.Deleted));
         booking.Room?.ReleaseSeats(booking.Seats);
         _context.Bookings.Remove(booking);
         await _context.SaveChangesAsync(cancellationToken);

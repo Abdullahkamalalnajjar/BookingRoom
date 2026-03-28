@@ -5209,6 +5209,7 @@
       "BookingRoom.Infrastructure >= 1.0.0",
       "Microsoft.AspNetCore.OpenApi >= 8.0.24",
       "Microsoft.EntityFrameworkCore.Design >= 8.0.24",
+      "Microsoft.Extensions.Caching.Hybrid >= 10.4.0",
       "Serilog >= 4.3.2-dev-02419",
       "Swashbuckle.AspNetCore >= 6.6.2"
     ]
@@ -5272,6 +5273,10 @@
             "suppressParent": "All",
             "target": "Package",
             "version": "[8.0.24, )"
+          },
+          "Microsoft.Extensions.Caching.Hybrid": {
+            "target": "Package",
+            "version": "[10.4.0, )"
           },
           "Serilog": {
             "target": "Package",

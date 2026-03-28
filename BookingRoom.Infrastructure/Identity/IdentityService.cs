@@ -1,3 +1,4 @@
+using System.Linq;
 using System.Security.Claims;
 
 using BookingRoom.Application.Common.Interfaces;
@@ -6,6 +7,8 @@ using BookingRoom.Application.Features.Identity.Commands.RegisterUser;
 using BookingRoom.Application.Features.Identity.Dtos;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 using BookingRoom.Domain.Common.Results;
 using BookingRoom.Domain.Identity;
 
@@ -163,6 +166,28 @@ public class IdentityService(
         var user = await _userManager.FindByIdAsync(userId);
 
         return user?.UserName;
+    }
+
+    public async Task<Dictionary<string, string?>> GetUserNamesAsync(List<string> userIds)
+    {
+        ArgumentNullException.ThrowIfNull(userIds);
+
+        var distinctIds = userIds
+            .Where(id => !string.IsNullOrWhiteSpace(id))
+            .Distinct()
+            .ToList();
+
+        if (distinctIds.Count == 0)
+        {
+            return new Dictionary<string, string?>();
+        }
+
+        var users = await _userManager.Users
+            .Where(user => distinctIds.Contains(user.Id))
+            .Select(user => new { user.Id, user.UserName })
+            .ToListAsync();
+
+        return users.ToDictionary(user => user.Id, user => user.UserName);
     }
 
     private async Task<Result<Success>> EnsureRoleExistsAsync(string roleName)

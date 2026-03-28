@@ -10,14 +10,22 @@ using Microsoft.Extensions.Logging;
 
 namespace BookingRoom.Application.Features.Bookings.Commands.CreateBooking;
 
-public class CreateBookingCommandHandler(IAppDbContext context, ILogger<CreateBookingCommandHandler> logger) :
+public class CreateBookingCommandHandler(IAppDbContext context, IUser user, IIdentityService identityService, ILogger<CreateBookingCommandHandler> logger) :
     IRequestHandler<CreateBookingCommand, Result<BookingDto>>
 {
     private readonly IAppDbContext _context = context;
+    private readonly IUser _user = user;
+    private readonly IIdentityService _identityService = identityService;
     private readonly ILogger<CreateBookingCommandHandler> _logger = logger;
 
     public async Task<Result<BookingDto>> Handle(CreateBookingCommand request, CancellationToken cancellationToken)
     {
+        if (string.IsNullOrWhiteSpace(_user.Id))
+        {
+            _logger.LogWarning("Create booking failed. Current user id is missing.");
+            return BookingErrors.UserRequired;
+        }
+
         var room = await _context.Rooms
             .AsTracking()
             .FirstOrDefaultAsync(x => x.Id == request.RoomId, cancellationToken);
@@ -40,7 +48,7 @@ public class CreateBookingCommandHandler(IAppDbContext context, ILogger<CreateBo
             return reserveResult.Errors;
         }
 
-        var createResult = Booking.Create(Guid.NewGuid(), request.RoomId, request.Seats);
+        var createResult = Booking.Create(Guid.NewGuid(), _user.Id, request.RoomId, request.Seats);
         if (createResult.IsError)
         {
             _logger.LogWarning(
@@ -69,6 +77,7 @@ public class CreateBookingCommandHandler(IAppDbContext context, ILogger<CreateBo
         _context.Bookings.Add(booking);
         await _context.SaveChangesAsync(cancellationToken);
 
-        return booking.ToDo(room.Name);
+        var userName = await _identityService.GetUserNameAsync(booking.UserId);
+        return booking.ToDo(room.Name, userName);
     }
 }

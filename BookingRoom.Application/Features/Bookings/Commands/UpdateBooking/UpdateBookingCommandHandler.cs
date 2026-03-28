@@ -9,10 +9,11 @@ using Microsoft.EntityFrameworkCore;
 
 namespace BookingRoom.Application.Features.Bookings.Commands.UpdateBooking;
 
-public class UpdateBookingCommandHandler(IAppDbContext context)
+public class UpdateBookingCommandHandler(IAppDbContext context, IIdentityService identityService)
 :IRequestHandler<UpdateBookingCommand,Result<BookingDto>>
 {
     private readonly IAppDbContext _context = context;
+    private readonly IIdentityService _identityService = identityService;
 
     public async Task<Result<BookingDto>> Handle(UpdateBookingCommand request, CancellationToken cancellationToken)
     {
@@ -90,6 +91,7 @@ public class UpdateBookingCommandHandler(IAppDbContext context)
 
         await _context.SaveChangesAsync(cancellationToken);
 
-        return booking.ToDo(targetRoom.Name);
+        var userName = await _identityService.GetUserNameAsync(booking.UserId);
+        return booking.ToDo(targetRoom.Name, userName);
     }
 }

@@ -9,17 +9,21 @@ using Microsoft.Extensions.Logging;
 
 namespace BookingRoom.Application.Features.Bookings.Queries.GetBookings;
 
-public class GetBookingsQueryHandler (IAppDbContext  context,ILogger<GetBookingsQueryHandler> logger)
+public class GetBookingsQueryHandler (IAppDbContext  context, IIdentityService identityService, ILogger<GetBookingsQueryHandler> logger)
 : IRequestHandler<GetBookingsQuery, Result<List<BookingDto>>>
 {
     private readonly IAppDbContext _context = context;
+    private readonly IIdentityService _identityService = identityService;
     private readonly ILogger<GetBookingsQueryHandler> _logger = logger;
+
     public async Task<Result<List<BookingDto>>> Handle(GetBookingsQuery request, CancellationToken cancellationToken)
     {
+ 
         IQueryable<BookingRoom.Domain.Bookings.Booking> bookingsQuery = _context.Bookings
             .AsNoTracking()
             .Include(x => x.Room);
         var bookings = await bookingsQuery.ToListAsync(cancellationToken);
-        return bookings.ToDtos();
+
+        return await bookings.ToDtosAsync(_identityService.GetUserNamesAsync);
     }
 }

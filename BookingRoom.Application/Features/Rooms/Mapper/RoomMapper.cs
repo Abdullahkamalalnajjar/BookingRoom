@@ -8,7 +8,7 @@ public static class RoomsMapper
     public static RoomDto ToDto(this Room room)
     {
         ArgumentNullException.ThrowIfNull(room);
-        return new RoomDto(room.Id,room.Name,room.SeatCapacity,room.AvailableSeats);
+        return new RoomDto(room.Id, room.Name, room.SeatCapacity, room.AvailableSeats, room.SeatPrice);
     }
     
     public static List<RoomDto> ToDtos(this List<Room> rooms)

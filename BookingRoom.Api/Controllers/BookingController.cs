@@ -1,4 +1,5 @@
 using BookingRoom.Application.Features.Bookings.Commands.CreateBooking;
+using BookingRoom.Application.Features.Bookings.Commands.CreateBookingCheckout;
 using BookingRoom.Application.Features.Bookings.Dtos;
 using BookingRoom.Application.Features.Bookings.Queries.GetBookingById;
 using BookingRoom.Application.Features.Bookings.Queries.GetBookings;
@@ -108,6 +109,29 @@ public sealed class BookingController(ISender sender) : ApiController
             {
                 Result<BookingDto> response = booking;
                 return CreatedAtAction(nameof(GetById), new { id = booking.Id }, response);
+            },
+            onError: Problem);
+    }
+    #endregion
+
+    #region Create Booking Checkout
+    [HttpPost("checkout")]
+    [Authorize(Policy = AuthorizationPolicies.BookingsWrite)]
+    [ProducesResponseType(typeof(Result<BookingCheckoutDto>), StatusCodes.Status201Created)]
+    [ProducesResponseType(typeof(Result<object?>), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(Result<object?>), StatusCodes.Status409Conflict)]
+    [ProducesResponseType(typeof(Result<object?>), StatusCodes.Status500InternalServerError)]
+    public async Task<IActionResult> CreateCheckout(
+        [FromBody] CreateBookingCheckoutCommand command,
+        CancellationToken cancellationToken)
+    {
+        var result = await _sender.Send(command, cancellationToken);
+
+        return result.Match(
+            onValue: checkout =>
+            {
+                Result<BookingCheckoutDto> response = checkout;
+                return CreatedAtAction(nameof(GetById), new { id = checkout.Booking.Id }, response);
             },
             onError: Problem);
     }

@@ -83,7 +83,7 @@ public class UpdateBookingCommandHandler(IAppDbContext context, IIdentityService
             }
         }
 
-        var updateResult = booking.Update(request.Seats, request.Status);
+        var updateResult = booking.Update(request.Seats, request.Status, targetRoom.SeatPrice);
         if (updateResult.IsError)
         {
             return updateResult.Errors;

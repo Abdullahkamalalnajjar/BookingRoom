@@ -11,21 +11,22 @@ public class Room : AuditableEntity
     public string Name { get; private set; } = string.Empty;
     public int SeatCapacity { get; private set; }
     public int AvailableSeats { get; private set; }
-
+    public decimal SeatPrice { get; private set; }
     public IReadOnlyCollection<Booking> Bookings => _bookings.AsReadOnly();
 
     private Room()
     {
     }
 
-    private Room(Guid id, string name, int seatCapacity) : base(id)
+    private Room(Guid id, string name, int seatCapacity, decimal seatPrice) : base(id)
     {
         Name = name;
         SeatCapacity = seatCapacity;
         AvailableSeats = seatCapacity;
+        SeatPrice = seatPrice;
     }
 
-    public static Result<Room> Create(Guid id, string name, int seatCapacity)
+    public static Result<Room> Create(Guid id, string name, int seatCapacity, decimal seatPrice)
     {
         if (string.IsNullOrWhiteSpace(name))
         {
@@ -37,10 +38,15 @@ public class Room : AuditableEntity
             return RoomErrors.CapacityInvalid;
         }
 
-        return new Room(id, name.Trim(), seatCapacity);
+        if (seatPrice < 0)
+        {
+            return RoomErrors.SeatPriceInvalid;
+        }
+
+        return new Room(id, name.Trim(), seatCapacity, seatPrice);
     }
 
-    public Result<Updated> Update(string name, int seatCapacity, int availableSeats)
+    public Result<Updated> Update(string name, int seatCapacity, int availableSeats, decimal seatPrice)
     {
         if (string.IsNullOrWhiteSpace(name))
         {
@@ -62,6 +68,11 @@ public class Room : AuditableEntity
             return RoomErrors.AvailableSeatsOverflow;
         }
 
+        if (seatPrice < 0)
+        {
+            return RoomErrors.SeatPriceInvalid;
+        }
+
         var reservedSeats = SeatCapacity - AvailableSeats;
 
         if (seatCapacity < reservedSeats)
@@ -78,6 +89,7 @@ public class Room : AuditableEntity
         Name = name.Trim();
         SeatCapacity = seatCapacity;
         AvailableSeats = availableSeats;
+        SeatPrice = seatPrice;
 
         return Result.Updated;
     }

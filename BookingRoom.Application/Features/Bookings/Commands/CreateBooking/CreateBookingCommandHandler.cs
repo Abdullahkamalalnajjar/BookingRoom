@@ -48,7 +48,7 @@ public class CreateBookingCommandHandler(IAppDbContext context, IUser user, IIde
             return reserveResult.Errors;
         }
 
-        var createResult = Booking.Create(Guid.NewGuid(), _user.Id, request.RoomId, request.Seats);
+        var createResult = Booking.Create(Guid.NewGuid(), _user.Id, request.RoomId, request.Seats, room.SeatPrice);
         if (createResult.IsError)
         {
             _logger.LogWarning(
@@ -62,7 +62,7 @@ public class CreateBookingCommandHandler(IAppDbContext context, IUser user, IIde
         var booking = createResult.Value;
 
         // Allow the client to set an initial status (still validated separately).
-        var updateResult = booking.Update(request.Seats, request.Status);
+        var updateResult = booking.Update(request.Seats, request.Status, room.SeatPrice);
         if (updateResult.IsError)
         {
             _logger.LogWarning(

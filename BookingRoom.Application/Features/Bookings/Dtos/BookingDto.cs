@@ -8,7 +8,10 @@ public class BookingDto
     public Guid RoomId { get; set; }
     public required string RoomName {get; set;}
     public int Seats { get; set; }
+    public decimal SubPrice { get; set; }
+    public decimal TotalPrice { get; set; }
     public string Status { get; set; } = string.Empty;
+    public string PaymentStatus { get; set; } = string.Empty;
     public DateTime CreatedAtUtc { get; set; }
     public DateTime UpdatedAtUtc { get; set; }
 }

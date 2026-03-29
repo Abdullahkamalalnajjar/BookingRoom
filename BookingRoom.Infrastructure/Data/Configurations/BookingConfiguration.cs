@@ -12,6 +12,9 @@ public class BookingConfiguration:IEntityTypeConfiguration<Booking>
     {
         builder.HasKey(b => b.Id).IsClustered(false);
         builder.Property(s => s.Seats).IsRequired();
+        builder.Property(s => s.SubPrice).HasPrecision(18, 2).IsRequired();
+        builder.Property(s => s.TotalPrice).HasPrecision(18, 2).IsRequired();
+        builder.Property(s => s.PaymentStatus).IsRequired();
         builder.Property(s => s.UserId).IsRequired().HasMaxLength(450);
         builder.Property(s => s.RoomId).IsRequired();
 

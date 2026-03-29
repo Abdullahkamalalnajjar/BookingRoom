@@ -10,5 +10,6 @@ public sealed record UpdateRoomCommand
     Guid RoomId,
     string Name ,
     int SeatCapacity ,
-    int AvailableSeats
+    int AvailableSeats,
+    decimal SeatPrice
 ):IRequest<Result<Updated>>;

@@ -32,7 +32,7 @@ public class UpdateRoomCommandHandler(IAppDbContext context):
             return RoomErrors.RoomNameIsExist;
         }
 
-        var updateResult = room.Update(normalizedName, request.SeatCapacity, request.AvailableSeats);
+        var updateResult = room.Update(normalizedName, request.SeatCapacity, request.AvailableSeats, request.SeatPrice);
         if (updateResult.IsError)
         {
             return updateResult.Errors;

@@ -12,5 +12,6 @@ public class RoomConfiguration : IEntityTypeConfiguration<Room>
         builder.Property(r => r.Name).IsRequired().HasMaxLength(100);
         builder.Property(r => r.SeatCapacity).IsRequired();
         builder.Property(r => r.AvailableSeats).IsRequired();
+        builder.Property(r => r.SeatPrice).HasPrecision(18, 2).IsRequired();
     }
 }

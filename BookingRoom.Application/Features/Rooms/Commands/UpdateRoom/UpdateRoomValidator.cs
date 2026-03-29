@@ -26,5 +26,9 @@ public class UpdateRoomValidator : AbstractValidator<UpdateRoomCommand>
         RuleFor(x => x.AvailableSeats)
             .LessThanOrEqualTo(x => x.SeatCapacity)
             .WithMessage("AvailableSeats cannot be greater than SeatCapacity.");
+
+        RuleFor(x => x.SeatPrice)
+            .GreaterThanOrEqualTo(0)
+            .WithMessage("SeatPrice cannot be negative.");
     }
 }

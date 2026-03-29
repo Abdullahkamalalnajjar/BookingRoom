@@ -15,6 +15,9 @@ public static class RoomErrors
     public static Error CapacityInvalid =>
         Error.Validation("Room_Capacity_Invalid", "Room capacity must be greater than zero");
 
+    public static Error SeatPriceInvalid =>
+        Error.Validation("Room_Seat_Price_Invalid", "Seat price cannot be negative.");
+
     public static Error InvalidSeatCount =>
         Error.Validation("Room_Seat_Count_Invalid", "Seat count must be greater than zero");
 

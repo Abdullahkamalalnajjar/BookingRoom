@@ -4,6 +4,7 @@ using BookingRoom.Infrastructure.Data;
 using BookingRoom.Infrastructure.Data.Interceptors;
 using BookingRoom.Infrastructure.Data.Seed;
 using BookingRoom.Infrastructure.Identity;
+using BookingRoom.Infrastructure.Payments;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -22,6 +23,7 @@ public static class DependencyInjection
         services.AddScoped<IdentityClaimsFactory>();
         services.AddScoped<AppDbContextSeeder>();
         services.Configure<SeedDataOptions>(configuration.GetSection("SeedData"));
+        services.Configure<PaymobOptions>(configuration.GetSection(PaymobOptions.SectionName));
 
         services.AddDbContext<AppDbContext>((serviceProvider, options) =>
             options
@@ -96,6 +98,8 @@ public static class DependencyInjection
         services.AddScoped<IAppDbContext>(provider => provider.GetRequiredService<AppDbContext>());
         services.AddScoped<IIdentityService, IdentityService>();
         services.AddScoped<ITokenProvider, TokenProvider>();
+        services.AddScoped<IPaymobWebhookService, PaymobWebhookService>();
+        services.AddHttpClient<IPaymentCheckoutService, PaymobCheckoutService>();
 
         return services;
     }

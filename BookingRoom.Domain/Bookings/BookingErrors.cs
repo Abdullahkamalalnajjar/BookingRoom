@@ -16,6 +16,9 @@ public static class BookingErrors
     public static Error SeatInvalid =>
     Error.Validation("Seat_Invalid","Seat invalid");
 
+    public static Error SeatPriceInvalid =>
+    Error.Validation("Seat_Price_Invalid","Seat price cannot be negative.");
+
     public static Error RoomRequired =>
     Error.Validation("Room_Required","Room is required");
 

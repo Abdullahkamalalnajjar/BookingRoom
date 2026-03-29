@@ -5,5 +5,6 @@ public sealed record  RoomDto
     Guid RoomId,
     string Name,
     int SeatCapacity,
-    int AvailableSeats
+    int AvailableSeats,
+    decimal SeatPrice
 );

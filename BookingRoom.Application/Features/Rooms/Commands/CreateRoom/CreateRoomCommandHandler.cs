@@ -25,7 +25,13 @@ public sealed class CreateRoomCommandHandler (IAppDbContext context):
         {
             return RoomErrors.CapacityInvalid;
         }
-        var roomResult = Room.Create(Guid.NewGuid(), request.Name, request.SeatCapacity);
+
+        if (request.SeatPrice < 0)
+        {
+            return RoomErrors.SeatPriceInvalid;
+        }
+
+        var roomResult = Room.Create(Guid.NewGuid(), request.Name, request.SeatCapacity, request.SeatPrice);
 
         if (roomResult.IsError)
         {

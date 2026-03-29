@@ -19,7 +19,10 @@ public static class BookingMapper
             RoomId = booking.RoomId,
             RoomName = roomName ?? booking.Room?.Name ?? string.Empty,
             Seats = booking.Seats,
+            SubPrice = booking.SubPrice,
+            TotalPrice = booking.TotalPrice,
             Status = booking.Status.ToString(),
+            PaymentStatus = booking.PaymentStatus.ToString(),
             CreatedAtUtc = booking.CreatedAtUtc.UtcDateTime,
             UpdatedAtUtc = booking.LastModifiedUtc.UtcDateTime,
         };

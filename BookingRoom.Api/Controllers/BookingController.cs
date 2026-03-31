@@ -9,6 +9,7 @@ using Asp.Versioning;
 using BookingRoom.Application.Features.Bookings.Commands.DeleteBooking;
 using BookingRoom.Application.Features.Bookings.Commands.UpdateBooking;
 using BookingRoom.Application.Features.Bookings.Queries.GetBookingByStatus;
+using System.Text.Json;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.OutputCaching;
 using Microsoft.AspNetCore.Mvc;
@@ -130,10 +131,38 @@ public sealed class BookingController(ISender sender) : ApiController
         return result.Match(
             onValue: checkout =>
             {
+                checkout.PaymentPageUrl ??= Url.ActionLink(
+                    nameof(PayPage),
+                    values: new
+                    {
+                        bookingId = checkout.Booking.Id,
+                        clientSecret = checkout.ClientSecret,
+                        publicKey = checkout.PublicKey
+                    });
+
                 Result<BookingCheckoutDto> response = checkout;
                 return CreatedAtAction(nameof(GetById), new { id = checkout.Booking.Id }, response);
             },
             onError: Problem);
+    }
+    #endregion
+
+    #region Pay Page
+    [HttpGet("pay/{bookingId:guid}")]
+    [AllowAnonymous]
+    [Produces("text/html")]
+    public IActionResult PayPage(
+        [FromRoute] Guid bookingId,
+        [FromQuery] string clientSecret,
+        [FromQuery] string publicKey)
+    {
+        if (string.IsNullOrWhiteSpace(clientSecret) || string.IsNullOrWhiteSpace(publicKey))
+        {
+            return BadRequest("Missing clientSecret or publicKey.");
+        }
+
+        var html = BuildPaymobCheckoutPage(bookingId, clientSecret, publicKey);
+        return Content(html, "text/html; charset=utf-8");
     }
     #endregion
 
@@ -162,4 +191,122 @@ public sealed class BookingController(ISender sender) : ApiController
             Problem);
     }
     #endregion
+
+    private static string BuildPaymobCheckoutPage(Guid bookingId, string clientSecret, string publicKey)
+    {
+        var serializedBookingId = JsonSerializer.Serialize(bookingId.ToString());
+        var serializedClientSecret = JsonSerializer.Serialize(clientSecret);
+        var serializedPublicKey = JsonSerializer.Serialize(publicKey);
+
+        return $$"""
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Booking Payment</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f4efe7;
+      --panel: #fffaf2;
+      --text: #1d1d1b;
+      --muted: #6d665c;
+      --accent: #b85c38;
+      --border: #e8dccb;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      background:
+        radial-gradient(circle at top left, #f7c78f 0, transparent 28%),
+        radial-gradient(circle at bottom right, #d2e7d0 0, transparent 30%),
+        var(--bg);
+      color: var(--text);
+      font-family: Georgia, "Times New Roman", serif;
+      padding: 24px;
+    }
+
+    main {
+      width: min(100%, 680px);
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 32px;
+      box-shadow: 0 18px 60px rgba(29, 29, 27, 0.12);
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: clamp(2rem, 5vw, 3.2rem);
+      line-height: 0.95;
+    }
+
+    p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .meta {
+      margin-top: 20px;
+      padding: 14px 16px;
+      border-radius: 16px;
+      background: #fff;
+      border: 1px solid var(--border);
+      font-size: 0.95rem;
+    }
+
+    .meta strong {
+      color: var(--text);
+    }
+
+    #paymob-checkout {
+      margin-top: 24px;
+      min-height: 72px;
+    }
+
+    #status {
+      margin-top: 18px;
+      padding: 14px 16px;
+      border-radius: 16px;
+      background: #fff;
+      border: 1px solid var(--border);
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Complete Your Payment</h1>
+    <p>Use the Paymob checkout button below to finish paying for your booking.</p>
+    <div class="meta"><strong>Booking ID:</strong> <span id="booking-id"></span></div>
+    <div id="paymob-checkout"></div>
+    <div id="status">Preparing checkout...</div>
+  </main>
+
+  <script src="https://nextstagingenv.s3.amazonaws.com/js/v1/paymob.js"></script>
+  <script>
+    const bookingId = {{serializedBookingId}};
+    const clientSecret = {{serializedClientSecret}};
+    const publicKey = {{serializedPublicKey}};
+
+    document.getElementById("booking-id").textContent = bookingId;
+
+    try {
+      Paymob(publicKey).checkoutButton(clientSecret).mount("#paymob-checkout");
+      document.getElementById("status").textContent = "Checkout is ready. Click the payment button to continue.";
+    } catch (error) {
+      document.getElementById("status").textContent =
+        "Unable to load Paymob checkout on this page. " + (error && error.message ? error.message : "");
+    }
+  </script>
+</body>
+</html>
+""";
+    }
 }

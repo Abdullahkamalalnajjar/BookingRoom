@@ -169,3 +169,4 @@
 /Users/kemo/RiderProjects/BookingRoom/BookingRoom.Api/bin/Debug/net8.0/Microsoft.Extensions.Identity.Core.dll
 /Users/kemo/RiderProjects/BookingRoom/BookingRoom.Api/bin/Debug/net8.0/Microsoft.Extensions.Identity.Stores.dll
 /Users/kemo/RiderProjects/BookingRoom/BookingRoom.Api/bin/Debug/net8.0/Serilog.dll
+/Users/kemo/RiderProjects/BookingRoom/BookingRoom.Api/bin/Debug/net8.0/web.config

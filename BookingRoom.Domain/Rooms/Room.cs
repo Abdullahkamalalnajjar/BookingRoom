@@ -1,6 +1,7 @@
 using BookingRoom.Domain.Bookings;
 using BookingRoom.Domain.Common;
 using BookingRoom.Domain.Common.Results;
+using BookingRoom.Domain.Rooms.Events;
 
 namespace BookingRoom.Domain.Rooms;
 
@@ -43,7 +44,9 @@ public class Room : AuditableEntity
             return RoomErrors.SeatPriceInvalid;
         }
 
-        return new Room(id, name.Trim(), seatCapacity, seatPrice);
+        var room = new Room(id, name.Trim(), seatCapacity, seatPrice);
+        room.AddDomainEvent(new RoomChangedEvent(room, RoomChangeType.Created));
+        return room;
     }
 
     public Result<Updated> Update(string name, int seatCapacity, int availableSeats, decimal seatPrice)
@@ -90,6 +93,7 @@ public class Room : AuditableEntity
         SeatCapacity = seatCapacity;
         AvailableSeats = availableSeats;
         SeatPrice = seatPrice;
+        AddDomainEvent(new RoomChangedEvent(this, RoomChangeType.Updated));
 
         return Result.Updated;
     }

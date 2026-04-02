@@ -99,6 +99,16 @@ public class IdentityService(
         return await BuildAppUserDtoAsync(user, roles);
     }
 
+    public Task<List<AppUserDto>> GetActiveUsersAsync(CancellationToken cancellationToken = default)
+    {
+        return GetUsersByDeletionStatusAsync(isDeleted: false, cancellationToken);
+    }
+
+    public Task<List<AppUserDto>> GetDeletedUsersAsync(CancellationToken cancellationToken = default)
+    {
+        return GetUsersByDeletionStatusAsync(isDeleted: true, cancellationToken);
+    }
+
     public async Task<Result<Deleted>> SoftDeleteAsync(string userId, CancellationToken cancellationToken = default)
     {
         var user = await _userManager.Users
@@ -127,6 +137,43 @@ public class IdentityService(
             .ExecuteDeleteAsync(cancellationToken);
 
         return Result.Deleted;
+    }
+
+    public async Task<Result<Updated>> RestoreDeletedUserAsync(
+        string email,
+        string password,
+        CancellationToken cancellationToken = default)
+    {
+        var normalizedEmail = _userManager.NormalizeEmail(email);
+        var user = await _userManager.Users
+            .FirstOrDefaultAsync(x => x.NormalizedEmail == normalizedEmail, cancellationToken);
+
+        if (user is null || !await _userManager.CheckPasswordAsync(user, password))
+        {
+            return Error.Unauthorized("Invalid_Login_Attempt", "Email / Password are incorrect");
+        }
+
+        if (!user.IsDeleted)
+        {
+            return Error.Conflict(
+                "User_Already_Active",
+                $"User with email '{UtilityService.MaskEmail(email)}' is already active.");
+        }
+
+        user.IsDeleted = false;
+        user.DeletedAtUtc = null;
+        user.LockoutEnd = null;
+        user.AccessFailedCount = 0;
+
+        var updateResult = await _userManager.UpdateAsync(user);
+        if (!updateResult.Succeeded)
+        {
+            return ToErrors(updateResult.Errors);
+        }
+
+        await _userManager.UpdateSecurityStampAsync(user);
+
+        return Result.Updated;
     }
 
     public async Task<Result<AppUserDto>> RegisterAsync(RegisterUserCommand request, CancellationToken cancellationToken = default)
@@ -271,5 +318,24 @@ public class IdentityService(
         var normalizedEmail = _userManager.NormalizeEmail(email);
         return _userManager.Users.FirstOrDefaultAsync(
             user => user.NormalizedEmail == normalizedEmail && !user.IsDeleted);
+    }
+
+    private async Task<List<AppUserDto>> GetUsersByDeletionStatusAsync(bool isDeleted, CancellationToken cancellationToken)
+    {
+        var users = await _userManager.Users
+            .AsNoTracking()
+            .Where(user => user.IsDeleted == isDeleted)
+            .OrderBy(user => user.Email)
+            .ToListAsync(cancellationToken);
+
+        var result = new List<AppUserDto>(users.Count);
+
+        foreach (var user in users)
+        {
+            var roles = await _userManager.GetRolesAsync(user);
+            result.Add(await BuildAppUserDtoAsync(user, roles));
+        }
+
+        return result;
     }
 }

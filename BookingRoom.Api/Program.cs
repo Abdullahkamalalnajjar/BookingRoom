@@ -1,6 +1,7 @@
 using System.Text;
 
 using BookingRoom.Api;
+using BookingRoom.Api.Hubs;
 using BookingRoom.Api.Infrastructure;
 using BookingRoom.Application;
 using BookingRoom.Infrastructure;
@@ -59,13 +60,15 @@ try
 
     app.UseMiddleware<RequestLogContextMiddleware>();
     app.UseExceptionHandler();
-    app.UseHttpsRedirection();
     app.UseCors("ApiCors");
+    app.UseHttpsRedirection();
     app.UseAuthentication();
     app.UseAuthorization();
     app.UseOutputCache();
 
     app.MapControllers();
+    app.MapHub<AccountSessionHub>("/hubs/account-session");
+    app.MapHub<SystemNotificationHub>("/hubs/system-notifications");
 
     app.Run();
 }

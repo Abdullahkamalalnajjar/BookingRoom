@@ -16,7 +16,13 @@ public interface IIdentityService
 
     Task<Result<AppUserDto>> GetUserByIdAsync(string userId);
 
+    Task<List<AppUserDto>> GetActiveUsersAsync(CancellationToken cancellationToken = default);
+
+    Task<List<AppUserDto>> GetDeletedUsersAsync(CancellationToken cancellationToken = default);
+
     Task<Result<Deleted>> SoftDeleteAsync(string userId, CancellationToken cancellationToken = default);
+
+    Task<Result<Updated>> RestoreDeletedUserAsync(string email, string password, CancellationToken cancellationToken = default);
 
     Task<string?> GetUserNameAsync(string userId);
 

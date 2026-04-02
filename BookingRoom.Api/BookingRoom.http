@@ -38,6 +38,26 @@ Content-Type: application/json
 
 ###
 
+POST {{BookingRoom_HostAddress}}/identity/restore-deleted-user
+Content-Type: application/json
+
+{
+  "email": "member@bookingroom.com",
+  "password": "123456"
+}
+
+###
+
+POST {{BookingRoom_HostAddress}}/api/notifications/broadcast
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "message": "System maintenance starts in 10 minutes."
+}
+
+###
+
 POST {{BookingRoom_HostAddress}}/api/auth/refresh
 Content-Type: application/json
 

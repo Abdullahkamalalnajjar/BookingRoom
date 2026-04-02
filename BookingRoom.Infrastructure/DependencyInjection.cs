@@ -1,5 +1,6 @@
 using BookingRoom.Application.Common.Interfaces;
 using BookingRoom.Application.Common.Security;
+using BookingRoom.Domain.Common.Results;
 using BookingRoom.Infrastructure.Bookings;
 using BookingRoom.Infrastructure.Data;
 using BookingRoom.Infrastructure.Data.Interceptors;
@@ -15,11 +16,16 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using System.Security.Claims;
 using System.Text;
+using Microsoft.AspNetCore.Http;
 
 namespace BookingRoom.Infrastructure;
 
 public static class DependencyInjection
 {
+    private const string DeletedAccountErrorCode = "Account_Deleted";
+    private const string DeletedAccountErrorDescription = "The user account has been deleted. Sign out and restore the account before signing in again.";
+    private const string ForceLogoutHeaderName = "X-Force-Logout";
+
     public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddScoped<AuditableEntityInterceptor>();
@@ -76,6 +82,20 @@ public static class DependencyInjection
 
                 options.Events = new JwtBearerEvents
                 {
+                    OnMessageReceived = context =>
+                    {
+                        var accessToken = context.Request.Query["access_token"];
+                        var path = context.HttpContext.Request.Path;
+
+                        if (!string.IsNullOrWhiteSpace(accessToken) &&
+                            (path.StartsWithSegments("/hubs/account-session") ||
+                             path.StartsWithSegments("/hubs/system-notifications")))
+                        {
+                            context.Token = accessToken;
+                        }
+
+                        return Task.CompletedTask;
+                    },
                     OnTokenValidated = async context =>
                     {
                         var userId = context.Principal?.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -92,8 +112,27 @@ public static class DependencyInjection
 
                         if (user is null || user.IsDeleted)
                         {
+                            context.HttpContext.Items[nameof(DeletedAccountErrorCode)] = DeletedAccountErrorCode;
+                            context.HttpContext.Items[nameof(DeletedAccountErrorDescription)] = DeletedAccountErrorDescription;
                             context.Fail("The user account is no longer active.");
                         }
+                    },
+                    OnChallenge = async context =>
+                    {
+                        if (!context.HttpContext.Items.TryGetValue(nameof(DeletedAccountErrorCode), out var errorCode) ||
+                            errorCode is not string code ||
+                            !context.HttpContext.Items.TryGetValue(nameof(DeletedAccountErrorDescription), out var errorDescription) ||
+                            errorDescription is not string description)
+                        {
+                            return;
+                        }
+
+                        context.HandleResponse();
+                        context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                        context.Response.Headers[ForceLogoutHeaderName] = "true";
+
+                        Result<object?> response = Error.Unauthorized(code, description);
+                        await context.Response.WriteAsJsonAsync(response);
                     }
                 };
             });

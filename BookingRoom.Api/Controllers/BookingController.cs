@@ -10,6 +10,7 @@ using BookingRoom.Application.Features.Bookings.Commands.DeleteBooking;
 using BookingRoom.Application.Features.Bookings.Commands.UpdateBooking;
 using BookingRoom.Application.Features.Bookings.Queries.GetBookingByStatus;
 using System.Text.Json;
+using BookingRoom.Application.Features.Bookings.Queries.GetBookingsForMember;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.OutputCaching;
 using Microsoft.AspNetCore.Mvc;
@@ -91,7 +92,26 @@ public sealed class BookingController(ISender sender) : ApiController
             onError: errors => Problem(errors));
     }
     #endregion
-
+    
+    #region Get Booking for member
+    [HttpGet("for-member")]
+    [Authorize(Policy = AuthorizationPolicies.BookingsRead)]
+    [ProducesResponseType(typeof(Result<List<BookingDto>>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(Result<object?>), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(Result<object?>), StatusCodes.Status500InternalServerError)]
+    [MapToApiVersion("1.0")]
+    public async Task<IActionResult> GetForMember(CancellationToken cancellationToken)
+    {
+        var result = await _sender.Send(new GetBookingsForMemberQuery(),cancellationToken);
+        return result.Match(
+            onValue: bookings =>
+            {
+                Result<List<BookingDto>> response = bookings;
+                return Ok(response);
+            }, onError:Problem);
+    }
+    #endregion
+    
     #region Create Booking
     [HttpPost]
     [Authorize(Policy = AuthorizationPolicies.BookingsWrite)]

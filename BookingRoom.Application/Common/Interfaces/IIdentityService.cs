@@ -16,6 +16,8 @@ public interface IIdentityService
 
     Task<Result<AppUserDto>> GetUserByIdAsync(string userId);
 
+    Task<Result<Deleted>> SoftDeleteAsync(string userId, CancellationToken cancellationToken = default);
+
     Task<string?> GetUserNameAsync(string userId);
 
     Task<Dictionary<string, string?>> GetUserNamesAsync(List<string> userIds);

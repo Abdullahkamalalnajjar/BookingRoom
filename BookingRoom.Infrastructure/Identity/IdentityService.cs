@@ -8,19 +8,20 @@ using BookingRoom.Application.Features.Identity.Dtos;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Caching.Memory;
 using BookingRoom.Domain.Common.Results;
 using BookingRoom.Domain.Identity;
 
 namespace BookingRoom.Infrastructure.Identity;
 
 public class IdentityService(
+    IAppDbContext context,
     UserManager<AppUser> userManager,
     IUserClaimsPrincipalFactory<AppUser> userClaimsPrincipalFactory,
     IAuthorizationService authorizationService,
     RoleManager<IdentityRole> roleManager,
     IdentityClaimsFactory identityClaimsFactory) : IIdentityService
 {
+    private readonly IAppDbContext _context = context;
     private readonly UserManager<AppUser> _userManager = userManager;
     private readonly IUserClaimsPrincipalFactory<AppUser> _userClaimsPrincipalFactory = userClaimsPrincipalFactory;
     private readonly IAuthorizationService _authorizationService = authorizationService;
@@ -29,7 +30,7 @@ public class IdentityService(
 
     public async Task<bool> IsInRoleAsync(string userId, string role)
     {
-        var user = await _userManager.FindByIdAsync(userId);
+        var user = await FindActiveUserByIdAsync(userId);
 
         return user != null && await _userManager.IsInRoleAsync(user, role);
     }
@@ -41,7 +42,7 @@ public class IdentityService(
             return false;
         }
 
-        var user = await _userManager.FindByIdAsync(userId);
+        var user = await FindActiveUserByIdAsync(userId);
 
         if (user == null)
         {
@@ -65,7 +66,7 @@ public class IdentityService(
 
     public async Task<Result<AppUserDto>> AuthenticateAsync(string email, string password)
     {
-        var user = await _userManager.FindByEmailAsync(email);
+        var user = await FindActiveUserByEmailAsync(email);
 
         if (user is null)
         {
@@ -87,7 +88,7 @@ public class IdentityService(
 
     public async Task<Result<AppUserDto>> GetUserByIdAsync(string userId)
     {
-        var user = await _userManager.FindByIdAsync(userId);
+        var user = await FindActiveUserByIdAsync(userId);
 
         if (user is null)
         {
@@ -96,6 +97,36 @@ public class IdentityService(
 
         var roles = await _userManager.GetRolesAsync(user);
         return await BuildAppUserDtoAsync(user, roles);
+    }
+
+    public async Task<Result<Deleted>> SoftDeleteAsync(string userId, CancellationToken cancellationToken = default)
+    {
+        var user = await _userManager.Users
+            .FirstOrDefaultAsync(x => x.Id == userId, cancellationToken);
+
+        if (user is null || user.IsDeleted)
+        {
+            return Error.NotFound("User_Not_Found", $"User with id '{userId}' was not found.");
+        }
+
+        user.IsDeleted = true;
+        user.DeletedAtUtc = DateTimeOffset.UtcNow;
+        user.LockoutEnabled = true;
+        user.LockoutEnd = DateTimeOffset.MaxValue;
+
+        var updateResult = await _userManager.UpdateAsync(user);
+        if (!updateResult.Succeeded)
+        {
+            return ToErrors(updateResult.Errors);
+        }
+
+        await _userManager.UpdateSecurityStampAsync(user);
+
+        await _context.RefreshTokens
+            .Where(refreshToken => refreshToken.UserId == userId)
+            .ExecuteDeleteAsync(cancellationToken);
+
+        return Result.Deleted;
     }
 
     public async Task<Result<AppUserDto>> RegisterAsync(RegisterUserCommand request, CancellationToken cancellationToken = default)
@@ -163,7 +194,7 @@ public class IdentityService(
 
     public async Task<string?> GetUserNameAsync(string userId)
     {
-        var user = await _userManager.FindByIdAsync(userId);
+        var user = await FindActiveUserByIdAsync(userId);
 
         return user?.UserName;
     }
@@ -183,7 +214,7 @@ public class IdentityService(
         }
 
         var users = await _userManager.Users
-            .Where(user => distinctIds.Contains(user.Id))
+            .Where(user => distinctIds.Contains(user.Id) && !user.IsDeleted)
             .Select(user => new { user.Id, user.UserName })
             .ToListAsync();
 
@@ -228,5 +259,17 @@ public class IdentityService(
             effectiveClaims,
             user.City,
             user.PhoneNumber);
+    }
+
+    private Task<AppUser?> FindActiveUserByIdAsync(string userId)
+    {
+        return _userManager.Users.FirstOrDefaultAsync(user => user.Id == userId && !user.IsDeleted);
+    }
+
+    private Task<AppUser?> FindActiveUserByEmailAsync(string email)
+    {
+        var normalizedEmail = _userManager.NormalizeEmail(email);
+        return _userManager.Users.FirstOrDefaultAsync(
+            user => user.NormalizedEmail == normalizedEmail && !user.IsDeleted);
     }
 }
